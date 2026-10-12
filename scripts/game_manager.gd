@@ -16,7 +16,7 @@ var game_active: bool = false
 var score: int = 0
 var lives: int = 3
 var alien_direction: int = 1
-var alien_speed: float = 50.0
+var alien_speed: float = 150.0
 var alien_drop_distance: float = 20.0
 var alien_move_timer: float = 0.0
 var alien_move_interval: float = 0.5
@@ -26,12 +26,13 @@ var ufo_direction: int = 1
 const UFO_SPAWN_INTERVAL: float = 20.0
 const UFO_SPEED: float = 150.0
 const UFO_SCORE: int = 100
+const ALIEN_SHOOT_CHANCE: float = 0.002
 
 func _ready() -> void:
 	add_to_group("game_manager")
 	player.position = Vector2(get_viewport_rect().size.x / 2, get_viewport_rect().size.y - 80)
 	hud.game_state = "start"
-	hud.start_label.visible = true
+	#hud.start.visible = true
 	hud.game_over_label.visible = false
 	hud.win_label.visible = false
 	if not alien_scene:
@@ -47,8 +48,8 @@ func spawn_aliens() -> void:
 		child.queue_free()
 	
 	aliens_remaining = 0
-	var columns: int = 11
-	var rows: int = 5
+	var columns: int = 10
+	var rows: int = 4
 	var start_x: float = 80.0
 	var start_y: float = 60.0
 	
@@ -98,7 +99,7 @@ func start_game() -> void:
 	score = 0
 	lives = 3
 	wave = 1
-	alien_speed = 50.0
+	alien_speed = 150.0
 	alien_direction = 1
 	alien_move_interval = 0.5
 	ufo_active = false
@@ -112,13 +113,17 @@ func start_game() -> void:
 	hud.update_wave()
 	hud.game_over_label.visible = false
 	hud.win_label.visible = false
-	hud.start_label.visible = false
+	hud.start_button.visible = false
+	
+	# Reset player visibility
+	player.visible = true
+	player.position = Vector2(get_viewport_rect().size.x / 2, get_viewport_rect().size.y - 80)
 	spawn_aliens()
 	spawn_shields()
 	ufo.visible = false
 
 func restart_game() -> void:
-	game_active = false
+	# Clear state without unnecessary toggle
 	for child in alien_grid.get_children():
 		child.queue_free()
 	for child in shield_grid.get_children():
@@ -126,7 +131,24 @@ func restart_game() -> void:
 	aliens_remaining = 0
 	ufo_active = false
 	ufo.visible = false
+	player.visible = true
 	start_game()
+
+func on_alien_killed(points: int) -> void:
+	if not game_active:
+		return
+	aliens_remaining -= 1
+	add_score(points)
+	# Check wave progression only when an alien is actually killed
+	if aliens_remaining <= 0:
+		wave += 1
+		alien_speed += 20
+		alien_move_interval = max(0.05, alien_move_interval * 0.8)
+		hud.wave = wave
+		hud.update_wave()
+		spawn_aliens()
+		spawn_shields()
+		alien_move_timer = 0.0
 
 func add_score(points: int) -> void:
 	if not game_active:
@@ -150,11 +172,24 @@ func game_over() -> void:
 	game_active = false
 	hud.game_state = "game_over"
 	hud.game_over_label.visible = true
+	# Hide player on game over
+	player.visible = false
+	hud.start_button.visible = true
+	
+	
+	
 
 func game_win() -> void:
 	game_active = false
 	hud.game_state = "win"
 	hud.win_label.visible = true
+
+func on_ufo_hit() -> void:
+	if not game_active:
+		return
+	add_score(UFO_SCORE)
+	ufo_active = false
+	ufo.visible = false
 
 func _process(delta: float) -> void:
 	if not game_active:
@@ -182,34 +217,26 @@ func _process(delta: float) -> void:
 		alien_move_timer = 0.0
 		for alien in alien_grid.get_children():
 			if alien is CharacterBody2D:
-				alien.velocity.x = alien_direction * alien_speed
-				alien.move_and_slide()
+				alien.position.x += alien_direction * alien_speed * delta
+		
+		# Check edge bounds after move and reverse if needed
+		for alien in alien_grid.get_children():
+			if alien is CharacterBody2D:
+				if alien_direction > 0 and alien.position.x > get_viewport_rect().size.x - 40:
+					alien_move_timer = alien_move_interval
+				elif alien_direction < 0 and alien.position.x < 40:
+					alien_move_timer = alien_move_interval
 	
-	# Check if aliens need to drop down again after move
+	# Alien shooting - random chance per move interval
 	for alien in alien_grid.get_children():
-		if alien is CharacterBody2D:
-			if alien_direction > 0 and alien.position.x > get_viewport_rect().size.x - 40:
-				alien_move_timer = alien_move_interval
-			elif alien_direction < 0 and alien.position.x < 40:
-				alien_move_timer = alien_move_interval
+		if alien is CharacterBody2D and randf() < ALIEN_SHOOT_CHANCE:
+			alien.shoot()
 	
 	# Check if aliens reached the player
 	for alien in alien_grid.get_children():
 		if alien is CharacterBody2D and alien.position.y > get_viewport_rect().size.y - 100:
 			game_over()
 			return
-	
-	# Check if all aliens are dead
-	if aliens_remaining <= 0:
-		wave += 1
-		alien_speed += 20
-		alien_move_interval = max(0.05, alien_move_interval * 0.8)
-		hud.wave = wave
-		hud.update_wave()
-		spawn_aliens()
-		spawn_shields()
-		alien_move_timer = 0.0
-		return
 	
 	# UFO logic
 	ufo_timer += delta

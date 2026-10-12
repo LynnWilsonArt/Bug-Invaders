@@ -7,7 +7,7 @@ extends CharacterBody2D
 
 var alive: bool = true
 var score_value: int = 10
-var alien_wave: int = 1
+var alien_wave: int = 1 
 var alien_speed: float = 100.0
 
 func _ready() -> void:
@@ -16,10 +16,7 @@ func _ready() -> void:
 func _physics_process(_delta: float) -> void:
 	if not alive:
 		return
-	velocity.y = speed
-	move_and_slide()
-	
-	# Remove if off screen
+	# Remove if off screen (from being dropped too low)
 	if position.y > screen_size.y + 32:
 		queue_free()
 

@@ -4,6 +4,8 @@
 [ext_resource type="Script" uid="uid://dkpldkhi8h7aj" path="res://scripts/hud.gd" id="3_sugp2"]
 [ext_resource type="PackedScene" uid="uid://dyrs7b7da4gw0" path="res://scenes/alien.tscn" id="3_tefeu"]
 [ext_resource type="PackedScene" uid="uid://ccex3whlfcfu" path="res://scenes/bullet.tscn" id="5_o6xl0"]
+[ext_resource type="Theme" uid="uid://clrpsvcpduvp" path="res://Theme/invaders_theme.tres" id="6_o6xl0"]
+[ext_resource type="Texture2D" uid="uid://15istx3spe7f" path="res://assets/images/ufo.png" id="6_tefeu"]
 [ext_resource type="PackedScene" uid="uid://dfjk4s3p0bnuf" path="res://scenes/player.tscn" id="6_tipki"]
 
 [node name="Main" type="Node2D" unique_id=109710071]
@@ -11,6 +13,12 @@ script = ExtResource("1_o5qli")
 alien_scene = ExtResource("3_tefeu")
 bullet_scene = ExtResource("5_o6xl0")
 player_scene = ExtResource("6_tipki")
+
+[node name="ColorRect" type="ColorRect" parent="." unique_id=271611009]
+offset_left = -1.0
+offset_right = 1151.0
+offset_bottom = 648.0
+color = Color(0, 0, 0, 1)
 
 [node name="Alien" parent="." unique_id=1654677534 instance=ExtResource("3_tefeu")]
 
@@ -38,27 +46,37 @@ text = "Lives: 3"
 horizontal_alignment = 1
 
 [node name="GameOver" type="Label" parent="HUD" unique_id=833864]
-offset_left = 506.0
-offset_top = 383.0
-offset_right = 806.0
-offset_bottom = 433.0
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -150.0
+offset_top = -25.0
+offset_right = 150.0
+offset_bottom = 25.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("6_o6xl0")
+theme_override_font_sizes/font_size = 73
 text = "GAME OVER"
 horizontal_alignment = 1
 
 [node name="Win" type="Label" parent="HUD" unique_id=165230]
-offset_left = 502.0
-offset_top = 343.0
-offset_right = 802.0
-offset_bottom = 393.0
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -201.5
+offset_top = -59.0
+offset_right = 201.5
+offset_bottom = 59.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("6_o6xl0")
+theme_override_font_sizes/font_size = 86
 text = "YOU WIN!"
-horizontal_alignment = 1
-
-[node name="Start" type="Label" parent="HUD" unique_id=9031]
-offset_left = 443.0
-offset_top = 303.0
-offset_right = 843.0
-offset_bottom = 343.0
-text = "Press SPACE to Start"
 horizontal_alignment = 1
 
 [node name="Wave" type="Label" parent="HUD" unique_id=22141]
@@ -72,6 +90,21 @@ grow_horizontal = 2
 text = "Wave: 1"
 horizontal_alignment = 1
 
+[node name="Start" type="Button" parent="HUD" unique_id=646126276]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -150.0
+offset_top = 200.0
+offset_right = 157.0
+offset_bottom = 284.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 55
+text = "Start Game"
+
 [node name="Bullet" parent="." unique_id=1542156566 instance=ExtResource("5_o6xl0")]
 
 [node name="ShieldGrid" type="Node2D" parent="." unique_id=15948194]
@@ -79,5 +112,25 @@ horizontal_alignment = 1
 [node name="UFO" type="Node2D" parent="." unique_id=9762559]
 
 [node name="Visual" type="Sprite2D" parent="UFO" unique_id=43949073]
+position = Vector2(-92, 122)
+texture = ExtResource("6_tefeu")
 
 [node name="Player" parent="." unique_id=1698699160 instance=ExtResource("6_tipki")]
+collision_layer = 4
+collision_mask = 6
+
+[node name="Label" type="Label" parent="." unique_id=519717518]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = 50.0
+offset_top = 615.0
+offset_right = 121.0
+offset_bottom = 638.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Ver. 1.0.0"
+
+[connection signal="pressed" from="HUD/Start" to="HUD" method="_on_start_button_pressed"]

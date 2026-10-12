@@ -34,18 +34,16 @@ func _on_body_entered(body: Node2D) -> void:
 		queue_free()
 		body.alive = false
 		body.queue_free()
-		if game_manager and game_manager.has_method("add_score"):
-			game_manager.add_score(10)
+		if game_manager and game_manager.has_method("on_alien_killed"):
+			game_manager.on_alien_killed(10)
 	elif not is_player_bullet and body.is_in_group("player"):
 		queue_free()
 		if game_manager and game_manager.has_method("lose_life"):
 			game_manager.lose_life()
 	elif is_player_bullet and body.is_in_group("ufo"):
 		queue_free()
-		if game_manager and game_manager.has_method("add_score"):
-			game_manager.add_score(game_manager.UFO_SCORE)
-		game_manager.ufo_active = false
-		game_manager.ufo.visible = false
+		if game_manager and game_manager.has_method("on_ufo_hit"):
+			game_manager.on_ufo_hit()
 
 func is_alive() -> bool:
 	return is_node_ready() and not is_queued_for_deletion()

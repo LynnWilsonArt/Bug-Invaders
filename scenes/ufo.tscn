@@ -1,0 +1,8 @@
+[gd_scene format=3 uid="uid://dyelticds5ovv"]
+
+[ext_resource type="Texture2D" uid="uid://uq6goaxxv2cr" path="res://icon.svg" id="1_rotgi"]
+
+[node name="Ufo" type="Node2D" unique_id=27197992]
+
+[node name="Visual" type="Sprite2D" parent="." unique_id=271712254]
+texture = ExtResource("1_rotgi")
