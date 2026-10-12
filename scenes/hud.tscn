@@ -1,0 +1,54 @@
+[gd_scene format=3 uid="uid://byyscihd8gylw"]
+
+[ext_resource type="Script" uid="uid://dkpldkhi8h7aj" path="res://scripts/hud.gd" id="2_5ysmq"]
+
+[node name="HUD" type="Control" unique_id=1195596910]
+layout_mode = 3
+anchors_preset = 0
+script = ExtResource("2_5ysmq")
+
+[node name="Start" type="Label" parent="." unique_id=1655277530]
+layout_mode = 0
+offset_left = 64.0
+offset_top = 27.0
+offset_right = 142.0
+offset_bottom = 73.0
+text = "Start"
+
+[node name="Win" type="Label" parent="." unique_id=895292288]
+layout_mode = 0
+offset_left = 255.0
+offset_top = 28.0
+offset_right = 316.0
+offset_bottom = 74.0
+text = "Win"
+
+[node name="GameOver" type="Label" parent="." unique_id=1989227278]
+layout_mode = 0
+offset_left = 469.0
+offset_top = 308.0
+offset_right = 648.0
+offset_bottom = 354.0
+text = "Game Over"
+
+[node name="Lives" type="Label" parent="." unique_id=1985029324]
+layout_mode = 0
+offset_left = 850.0
+offset_top = 14.0
+offset_right = 930.0
+offset_bottom = 60.0
+text = "Lives"
+
+[node name="Score" type="Label" parent="." unique_id=2088777784]
+layout_mode = 0
+offset_left = 1019.0
+offset_top = 14.0
+offset_right = 1107.0
+offset_bottom = 60.0
+text = "Score"
+
+[node name="Wave" type="Label" parent="." unique_id=1917377863]
+layout_mode = 0
+offset_right = 90.0
+offset_bottom = 34.0
+text = "Wave: 1"
