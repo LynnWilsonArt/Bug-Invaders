@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://dkpldkhi8h7aj" path="res://scripts/hud.gd" id="2_5ysmq"]
 
-[node name="HUD" type="Control" unique_id=1195596910]
+[node name="HUDRoot" type="Control" unique_id=1195596910]
 layout_mode = 3
 anchors_preset = 0
 script = ExtResource("2_5ysmq")

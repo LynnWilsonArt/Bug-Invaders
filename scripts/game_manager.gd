@@ -8,7 +8,7 @@ extends Node2D
 @onready var player: Node2D = $Player
 @onready var alien_grid: Node2D = $AlienGrid
 @onready var shield_grid: Node2D = $ShieldGrid
-@onready var ufo: Node2D = $UFO
+@onready var ufo: Area2D = $UFO
 
 var aliens_remaining: int = 0
 var wave: int = 1
@@ -20,11 +20,8 @@ var alien_speed: float = 150.0
 var alien_drop_distance: float = 20.0
 var alien_move_timer: float = 0.0
 var alien_move_interval: float = 0.5
-var ufo_active: bool = false
 var ufo_timer: float = 0.0
-var ufo_direction: int = 1
 const UFO_SPAWN_INTERVAL: float = 20.0
-const UFO_SPEED: float = 150.0
 const UFO_SCORE: int = 100
 const ALIEN_SHOOT_CHANCE: float = 0.002
 
@@ -32,7 +29,6 @@ func _ready() -> void:
 	add_to_group("game_manager")
 	player.position = Vector2(get_viewport_rect().size.x / 2, get_viewport_rect().size.y - 80)
 	hud.game_state = "start"
-	#hud.start.visible = true
 	hud.game_over_label.visible = false
 	hud.win_label.visible = false
 	if not alien_scene:
@@ -81,7 +77,7 @@ func spawn_shields() -> void:
 		
 		var visual: ColorRect = ColorRect.new()
 		visual.size = Vector2(40, 30)
-		visual.color = Color(0.2, 1.0, 0.2, 0.8)
+		visual.color = Color(0.2, 1.0, 0.8, 0.8)
 		shield.add_child(visual)
 		
 		var collision: CollisionShape2D = CollisionShape2D.new()
@@ -102,9 +98,7 @@ func start_game() -> void:
 	alien_speed = 150.0
 	alien_direction = 1
 	alien_move_interval = 0.5
-	ufo_active = false
 	ufo_timer = 0.0
-	ufo_direction = 1
 	hud.game_state = "playing"
 	hud.score = score
 	hud.lives = lives
@@ -115,21 +109,20 @@ func start_game() -> void:
 	hud.win_label.visible = false
 	hud.start_button.visible = false
 	
-	# Reset player visibility
 	player.visible = true
 	player.position = Vector2(get_viewport_rect().size.x / 2, get_viewport_rect().size.y - 80)
 	spawn_aliens()
 	spawn_shields()
+	ufo.is_active = false
 	ufo.visible = false
 
 func restart_game() -> void:
-	# Clear state without unnecessary toggle
 	for child in alien_grid.get_children():
 		child.queue_free()
 	for child in shield_grid.get_children():
 		child.queue_free()
 	aliens_remaining = 0
-	ufo_active = false
+	ufo.is_active = false
 	ufo.visible = false
 	player.visible = true
 	start_game()
@@ -139,7 +132,6 @@ func on_alien_killed(points: int) -> void:
 		return
 	aliens_remaining -= 1
 	add_score(points)
-	# Check wave progression only when an alien is actually killed
 	if aliens_remaining <= 0:
 		wave += 1
 		alien_speed += 20
@@ -172,23 +164,20 @@ func game_over() -> void:
 	game_active = false
 	hud.game_state = "game_over"
 	hud.game_over_label.visible = true
-	# Hide player on game over
 	player.visible = false
 	hud.start_button.visible = true
-	
-	
-	
 
 func game_win() -> void:
 	game_active = false
 	hud.game_state = "win"
 	hud.win_label.visible = true
+	hud.start_button.visible = true
 
 func on_ufo_hit() -> void:
 	if not game_active:
 		return
 	add_score(UFO_SCORE)
-	ufo_active = false
+	ufo.is_active = false
 	ufo.visible = false
 
 func _process(delta: float) -> void:
@@ -238,17 +227,15 @@ func _process(delta: float) -> void:
 			game_over()
 			return
 	
-	# UFO logic
+	# UFO spawning logic
 	ufo_timer += delta
-	if not ufo_active and ufo_timer >= UFO_SPAWN_INTERVAL:
-		ufo_active = true
+	if not ufo.is_active and ufo_timer >= UFO_SPAWN_INTERVAL:
 		ufo_timer = 0.0
+		ufo.is_active = true
 		ufo.visible = true
 		ufo.position = Vector2(-60, 30)
-		ufo_direction = 1
 	
-	if ufo_active and ufo.visible:
-		ufo.position.x += UFO_SPEED * delta * ufo_direction
-		if ufo.position.x > get_viewport_rect().size.x + 60:
-			ufo.visible = false
-			ufo_active = false
+	# Hide UFO if it leaves the screen
+	if ufo.is_active and ufo.position.x > get_viewport_rect().size.x + 60:
+		ufo.is_active = false
+		ufo.visible = false

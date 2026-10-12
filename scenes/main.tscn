@@ -7,6 +7,7 @@
 [ext_resource type="Theme" uid="uid://clrpsvcpduvp" path="res://Theme/invaders_theme.tres" id="6_o6xl0"]
 [ext_resource type="Texture2D" uid="uid://15istx3spe7f" path="res://assets/images/ufo.png" id="6_tefeu"]
 [ext_resource type="PackedScene" uid="uid://dfjk4s3p0bnuf" path="res://scenes/player.tscn" id="6_tipki"]
+[ext_resource type="Script" uid="uid://cyexpc0kpf1wk" path="res://scripts/ufo.gd" id="7_tipki"]
 
 [node name="Main" type="Node2D" unique_id=109710071]
 script = ExtResource("1_o5qli")
@@ -109,17 +110,22 @@ text = "Start Game"
 
 [node name="ShieldGrid" type="Node2D" parent="." unique_id=15948194]
 
-[node name="UFO" type="Node2D" parent="." unique_id=9762559]
+[node name="UFO" type="Area2D" parent="." unique_id=809964492]
+collision_layer = 0
+collision_mask = 2
+script = ExtResource("7_tipki")
 
 [node name="Visual" type="Sprite2D" parent="UFO" unique_id=43949073]
 position = Vector2(-92, 122)
 texture = ExtResource("6_tefeu")
 
+[node name="Collision" type="CollisionShape2D" parent="UFO" unique_id=115646102]
+
 [node name="Player" parent="." unique_id=1698699160 instance=ExtResource("6_tipki")]
 collision_layer = 4
 collision_mask = 6
 
-[node name="Label" type="Label" parent="." unique_id=519717518]
+[node name="Version" type="Label" parent="." unique_id=519717518]
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5

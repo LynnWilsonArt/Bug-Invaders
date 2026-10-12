@@ -1,8 +1,20 @@
 [gd_scene format=3 uid="uid://dyelticds5ovv"]
 
 [ext_resource type="Texture2D" uid="uid://uq6goaxxv2cr" path="res://icon.svg" id="1_rotgi"]
+[ext_resource type="Script" uid="uid://cyexpc0kpf1wk" path="res://scripts/ufo.gd" id="1_xf4xf"]
+[ext_resource type="PackedScene" uid="uid://ccex3whlfcfu" path="res://scenes/bullet.tscn" id="2_gp6nc"]
 
-[node name="Ufo" type="Node2D" unique_id=27197992]
+[sub_resource type="CircleShape2D" id="CircleShape2D_tipki"]
+radius = 50.24938
+
+[node name="Ufo" type="Area2D" unique_id=27197992]
+collision_layer = 4
+collision_mask = 2
+script = ExtResource("1_xf4xf")
+bomb_scene = ExtResource("2_gp6nc")
 
 [node name="Visual" type="Sprite2D" parent="." unique_id=271712254]
 texture = ExtResource("1_rotgi")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=999000001]
+shape = SubResource("CircleShape2D_tipki")
