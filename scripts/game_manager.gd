@@ -8,7 +8,9 @@ extends Node2D
 @onready var player: Node2D = $Player
 @onready var alien_grid: Node2D = $AlienGrid
 @onready var shield_grid: Node2D = $ShieldGrid
-@onready var ufo: Area2D = $UFO
+@onready var ufo: Area2D = $Ufo
+ 
+
 
 var aliens_remaining: int = 0
 var wave: int = 1
