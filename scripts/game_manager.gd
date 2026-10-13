@@ -1,47 +1,66 @@
 extends Node2D
 
+# ============================================
+# GameManager - Central game state controller
+# Manages waves, scoring, lives, spawning, and game flow.
+# ============================================
+
+# --- Exported scene references (assigned in inspector) ---
 @export var alien_scene: PackedScene
 @export var bullet_scene: PackedScene
 @export var player_scene: PackedScene
 
+# --- On-ready node references ---
 @onready var hud: CanvasLayer = $HUD
 @onready var player: Node2D = $Player
 @onready var alien_grid: Node2D = $AlienGrid
 @onready var shield_grid: Node2D = $ShieldGrid
 @onready var ufo: Area2D = $Ufo
- 
 
-
+# --- Game state variables ---
 var aliens_remaining: int = 0
 var wave: int = 1
 var game_active: bool = false
 var score: int = 0
 var lives: int = 3
+
+# --- Alien movement state ---
 var alien_direction: int = 1
 var alien_speed: float = 150.0
 var alien_drop_distance: float = 20.0
 var alien_move_timer: float = 0.0
 var alien_move_interval: float = 0.5
+
+# --- UFO spawning state ---
 var ufo_timer: float = 0.0
 const UFO_SPAWN_INTERVAL: float = 20.0
 const UFO_SCORE: int = 100
 const ALIEN_SHOOT_CHANCE: float = 0.002
 
+# ============================================
+# _ready() - Initialize game state and validate references
+# ============================================
 func _ready() -> void:
 	add_to_group("game_manager")
+	# Center player at bottom of screen
 	player.position = Vector2(get_viewport_rect().size.x / 2, get_viewport_rect().size.y - 80)
 	hud.game_state = "start"
 	hud.game_over_label.visible = false
 	hud.win_label.visible = false
+	# Validate required scene references
 	if not alien_scene:
 		push_error("alien_scene is not assigned in the inspector!")
 	if not bullet_scene:
 		push_error("bullet_scene is not assigned in the inspector!")
 
+# ============================================
+# spawn_aliens() - Create a grid of aliens for the current wave
+# ============================================
 func spawn_aliens() -> void:
 	if not alien_scene:
 		push_error("Cannot spawn aliens: alien_scene is null!")
 		return
+	# Clear existing aliens
 	for child in alien_grid.get_children():
 		child.queue_free()
 	
@@ -51,6 +70,7 @@ func spawn_aliens() -> void:
 	var start_x: float = 80.0
 	var start_y: float = 60.0
 	
+	# Instantiate alien grid
 	for row in range(rows):
 		for col in range(columns):
 			var alien: CharacterBody2D = alien_scene.instantiate()
@@ -61,6 +81,9 @@ func spawn_aliens() -> void:
 			alien_grid.add_child(alien)
 			aliens_remaining += 1
 
+# ============================================
+# spawn_shields() - Create protective barriers for the player
+# ============================================
 func spawn_shields() -> void:
 	for child in shield_grid.get_children():
 		child.queue_free()
@@ -77,11 +100,13 @@ func spawn_shields() -> void:
 		shield.position = pos
 		shield.add_to_group("shield")
 		
+		# Shield visual
 		var visual: ColorRect = ColorRect.new()
 		visual.size = Vector2(40, 30)
 		visual.color = Color(0.2, 1.0, 0.8, 0.8)
 		shield.add_child(visual)
 		
+		# Shield collision
 		var collision: CollisionShape2D = CollisionShape2D.new()
 		var shape: RectangleShape2D = RectangleShape2D.new()
 		shape.size = Vector2(38, 28)
@@ -90,6 +115,9 @@ func spawn_shields() -> void:
 		
 		shield_grid.add_child(shield)
 
+# ============================================
+# start_game() - Initialize a new game session
+# ============================================
 func start_game() -> void:
 	if game_active:
 		return
@@ -101,6 +129,7 @@ func start_game() -> void:
 	alien_direction = 1
 	alien_move_interval = 0.5
 	ufo_timer = 0.0
+	
 	hud.game_state = "playing"
 	hud.score = score
 	hud.lives = lives
@@ -118,6 +147,9 @@ func start_game() -> void:
 	ufo.is_active = false
 	ufo.visible = false
 
+# ============================================
+# restart_game() - Clean up and restart from scratch
+# ============================================
 func restart_game() -> void:
 	for child in alien_grid.get_children():
 		child.queue_free()
@@ -129,11 +161,15 @@ func restart_game() -> void:
 	player.visible = true
 	start_game()
 
+# ============================================
+# on_alien_killed() - Handle alien destruction
+# ============================================
 func on_alien_killed(points: int) -> void:
 	if not game_active:
 		return
 	aliens_remaining -= 1
 	add_score(points)
+	# Check if wave is cleared
 	if aliens_remaining <= 0:
 		wave += 1
 		alien_speed += 20
@@ -144,15 +180,22 @@ func on_alien_killed(points: int) -> void:
 		spawn_shields()
 		alien_move_timer = 0.0
 
+# ============================================
+# add_score() - Update score and check win condition
+# ============================================
 func add_score(points: int) -> void:
 	if not game_active:
 		return
 	score += points
 	hud.score = score
 	hud.update_score()
+	# Win condition: reach 300 points
 	if score >= 300:
 		game_win()
 
+# ============================================
+# lose_life() - Handle player taking damage
+# ============================================
 func lose_life() -> void:
 	if not game_active:
 		return
@@ -162,6 +205,9 @@ func lose_life() -> void:
 	if lives <= 0:
 		game_over()
 
+# ============================================
+# game_over() - Trigger game over state
+# ============================================
 func game_over() -> void:
 	game_active = false
 	hud.game_state = "game_over"
@@ -169,12 +215,18 @@ func game_over() -> void:
 	player.visible = false
 	hud.start_button.visible = true
 
+# ============================================
+# game_win() - Trigger win state
+# ============================================
 func game_win() -> void:
 	game_active = false
 	hud.game_state = "win"
 	hud.win_label.visible = true
 	hud.start_button.visible = true
 
+# ============================================
+# on_ufo_hit() - Handle UFO destruction
+# ============================================
 func on_ufo_hit() -> void:
 	if not game_active:
 		return
@@ -182,11 +234,14 @@ func on_ufo_hit() -> void:
 	ufo.is_active = false
 	ufo.visible = false
 
+# ============================================
+# _process() - Main game loop (movement, spawning, bounds)
+# ============================================
 func _process(delta: float) -> void:
 	if not game_active:
 		return
 	
-	# Check if aliens need to drop down
+	# Check if aliens need to drop down at screen edges
 	var need_drop: bool = false
 	for alien in alien_grid.get_children():
 		if alien is CharacterBody2D:
@@ -223,7 +278,7 @@ func _process(delta: float) -> void:
 		if alien is CharacterBody2D and randf() < ALIEN_SHOOT_CHANCE:
 			alien.shoot()
 	
-	# Check if aliens reached the player
+	# Check if aliens reached the player (game over condition)
 	for alien in alien_grid.get_children():
 		if alien is CharacterBody2D and alien.position.y > get_viewport_rect().size.y - 100:
 			game_over()

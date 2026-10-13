@@ -1,17 +1,30 @@
 extends Area2D
 
+# ============================================
+# UFO - Bonus target controller
+# Moves across the top of the screen, drops bombs periodically, and awards points when destroyed.
+# ============================================
+
+# --- Exported configuration ---
 @export var bomb_scene: PackedScene
 @export var bomb_drop_interval: float = 1.5
 @export var speed: float = 200.0
 
+# --- State variables ---
 var is_active: bool = true
 var drop_timer: float = 0.0
 var direction: int = 1
 
+# ============================================
+# _ready() - Initialize UFO group and connect collision signal
+# ============================================
 func _ready() -> void:
 	add_to_group("ufo")
 	body_entered.connect(_on_body_entered)
 
+# ============================================
+# _process() - Move UFO horizontally and drop bombs
+# ============================================
 func _process(delta: float) -> void:
 	if not is_active:
 		return
@@ -21,6 +34,9 @@ func _process(delta: float) -> void:
 		drop_timer = 0.0
 		drop_bomb()
 
+# ============================================
+# drop_bomb() - Instantiate and spawn an alien bomb from the UFO
+# ============================================
 func drop_bomb() -> void:
 	if not bomb_scene:
 		return
@@ -32,6 +48,9 @@ func drop_bomb() -> void:
 	parent.add_child(bomb)
 	bomb.position = global_position + Vector2(0, 30)
 
+# ============================================
+# _on_body_entered() - Handle UFO being hit by player bullets
+# ============================================
 func _on_body_entered(body: Node2D) -> void:
 	if not is_active:
 		return
