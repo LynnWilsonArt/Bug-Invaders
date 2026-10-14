@@ -26,16 +26,17 @@ var lives: int = 3
 
 # --- Alien movement state ---
 var alien_direction: int = 1
-var alien_speed: float = 150.0
+var alien_speed: float = 200.0
 var alien_drop_distance: float = 20.0
 var alien_move_timer: float = 0.0
 var alien_move_interval: float = 0.5
 
 # --- UFO spawning state ---
 var ufo_timer: float = 0.0
-const UFO_SPAWN_INTERVAL: float = 20.0
+const UFO_SPAWN_INTERVAL: float = 5.0
 const UFO_SCORE: int = 100
 const ALIEN_SHOOT_CHANCE: float = 0.002
+const WAVES_TO_WIN: int = 3
 
 # ============================================
 # _ready() - Initialize game state and validate references
@@ -169,8 +170,13 @@ func on_alien_killed(points: int) -> void:
 		return
 	aliens_remaining -= 1
 	add_score(points)
-	# Check if wave is cleared
+
 	if aliens_remaining <= 0:
+		# Final wave cleared -> win
+		if wave >= WAVES_TO_WIN:
+			game_win()
+			return
+		# Otherwise start next wave
 		wave += 1
 		alien_speed += 20
 		alien_move_interval = max(0.05, alien_move_interval * 0.8)
@@ -189,9 +195,6 @@ func add_score(points: int) -> void:
 	score += points
 	hud.score = score
 	hud.update_score()
-	# Win condition: reach 300 points
-	if score >= 300:
-		game_win()
 
 # ============================================
 # lose_life() - Handle player taking damage
