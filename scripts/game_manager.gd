@@ -35,8 +35,8 @@ var alien_move_interval: float = 0.5
 var ufo_timer: float = 0.0
 const UFO_SPAWN_INTERVAL: float = 5.0
 const UFO_SCORE: int = 100
-const ALIEN_SHOOT_CHANCE: float = 0.002
-const WAVES_TO_WIN: int = 3
+const ALIEN_SHOOT_CHANCE: float = 0.001
+const WAVES_TO_WIN: int = 5
 
 # ============================================
 # _ready() - Initialize game state and validate references
@@ -100,6 +100,9 @@ func spawn_shields() -> void:
 		var shield: Area2D = Area2D.new()
 		shield.position = pos
 		shield.add_to_group("shield")
+		# Set collision layer to match bullet's mask (4)
+		shield.collision_layer = 4
+		shield.collision_mask = 0
 		
 		# Shield visual
 		var visual: ColorRect = ColorRect.new()
@@ -276,26 +279,8 @@ func _process(delta: float) -> void:
 				elif alien_direction < 0 and alien.position.x < 40:
 					alien_move_timer = alien_move_interval
 	
-	# Alien shooting - random chance per move interval
+	# Alien shooting - each alien has a chance to drop a bomb
 	for alien in alien_grid.get_children():
-		if alien is CharacterBody2D and randf() < ALIEN_SHOOT_CHANCE:
-			alien.shoot()
-	
-	# Check if aliens reached the player (game over condition)
-	for alien in alien_grid.get_children():
-		if alien is CharacterBody2D and alien.position.y > get_viewport_rect().size.y - 100:
-			game_over()
-			return
-	
-	# UFO spawning logic
-	ufo_timer += delta
-	if not ufo.is_active and ufo_timer >= UFO_SPAWN_INTERVAL:
-		ufo_timer = 0.0
-		ufo.is_active = true
-		ufo.visible = true
-		ufo.position = Vector2(-60, 30)
-	
-	# Hide UFO if it leaves the screen
-	if ufo.is_active and ufo.position.x > get_viewport_rect().size.x + 60:
-		ufo.is_active = false
-		ufo.visible = false
+		if alien is CharacterBody2D and alien.alive:
+			if randf() < ALIEN_SHOOT_CHANCE:
+				alien.shoot()

@@ -21,6 +21,7 @@ offset_bottom = 648.0
 color = Color(0, 0, 0, 1)
 
 [node name="Alien" parent="." unique_id=1654677534 instance=ExtResource("3_tefeu")]
+visible = false
 
 [node name="AlienGrid" type="Node2D" parent="." unique_id=1365081926]
 
